@@ -281,7 +281,7 @@ class ModelWrapper(object):
         mb_l = [self.parser.legal_labels(p.stack, p.buffer) for p in partial_parses]
 
         pred = self.parser.model(mb_x)
-        pred = pred.detach().numpy()
+        pred = pred.cpu().detach().numpy()
         pred = np.argmax(pred + 10000 * np.array(mb_l).astype('float32'), 1)
         pred = ["S" if p == 2 else ("LA" if p == 0 else "RA") for p in pred]
         return pred
