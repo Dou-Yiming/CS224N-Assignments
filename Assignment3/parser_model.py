@@ -34,7 +34,8 @@ class ParserModel(nn.Module):
     """
 
     def __init__(self, embeddings, n_features=36,
-                 hidden_size=512, n_classes=3, dropout_prob=0.8):
+                 hidden_size_1=1024, hidden_size_2=512, hidden_size_3=256,
+                 n_classes=3, dropout_prob=0.5):
         """ Initialize the parser model.
 
         @param embeddings (Tensor): word embeddings (num_words, embedding_size)
@@ -48,7 +49,9 @@ class ParserModel(nn.Module):
         self.n_classes = n_classes
         self.dropout_prob = dropout_prob
         self.embed_size = embeddings.shape[1]
-        self.hidden_size = hidden_size
+        self.hidden_size_1 = hidden_size_1
+        self.hidden_size_2 = hidden_size_2
+        self.hidden_size_3 = hidden_size_3
         self.pretrained_embeddings = nn.Embedding(
             embeddings.shape[0], self.embed_size)
         self.pretrained_embeddings.weight = nn.Parameter(
@@ -78,10 +81,14 @@ class ParserModel(nn.Module):
         # Dropout: https://pytorch.org/docs/stable/nn.html#torch.nn.Dropout
 
         self.embed_to_hidden = nn.Linear(
-            self.n_features * self.embed_size, hidden_size)
+            self.n_features * self.embed_size, hidden_size_1)
+        self.hidden_to_hidden_1 = nn.Linear(hidden_size_1, hidden_size_2)
+        self.hidden_to_hidden_2 = nn.Linear(hidden_size_2, hidden_size_3)
+        self.hidden_to_logits = nn.Linear(hidden_size_3, self.n_classes)
+
         nn.init.xavier_uniform_(self.embed_to_hidden.weight, gain=1)
-        self.dropout = nn.Dropout(p=dropout_prob)
-        self.hidden_to_logits = nn.Linear(hidden_size, self.n_classes)
+        nn.init.xavier_uniform_(self.hidden_to_hidden_1.weight, gain=1)
+        nn.init.xavier_uniform_(self.hidden_to_hidden_2.weight, gain=1)
         nn.init.xavier_uniform_(self.hidden_to_logits.weight, gain=1)
 
         # END YOUR CODE
@@ -152,8 +159,18 @@ class ParserModel(nn.Module):
         # ReLU: https://pytorch.org/docs/stable/nn.html?highlight=relu#torch.nn.functional.relu
         t = t.to(device)
         x = self.embedding_lookup(t)
+
         x = self.embed_to_hidden(x)
-        x = F.relu(x)
+        x = F.leaky_relu(x)
+
+        x = self.hidden_to_hidden_1(x)
+        x = F.leaky_relu(x)
+        x = F.dropout(x, p=self.dropout_prob)
+
+        x = self.hidden_to_hidden_2(x)
+        x = F.leaky_relu(x)
+        x = F.dropout(x, p=self.dropout_prob)
+
         logits = self.hidden_to_logits(x)
         # END YOUR CODE
         return logits
