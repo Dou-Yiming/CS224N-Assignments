@@ -23,7 +23,7 @@ The assignments of Stanford CS224N: NLP with Deep Learning | Winter 2019
     
 - **Assignment4: Neural Machine Translation with RNNs**
 
-    - Corpus BLEU: 21.49
+    - Corpus BLEU: 22.63
 
     - Translation example:
 
@@ -38,8 +38,8 @@ The assignments of Stanford CS224N: NLP with Deep Learning | Winter 2019
         - translated text (English):
 
             ```
-            It needs truth and beauty and I'm very happy that today I was talking about this.
-            It also needs -- needs dignity, love and pleasure. And it's our job to provide those things.
+            It needs truth and beauty, and I'm very happy that today, I talked a lot about this.
+            It also needs -- it needs dignity, love and pleasure. And it's our work to provide those things.
             Thank you.
             ```
 
